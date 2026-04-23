@@ -8,11 +8,6 @@
 	url = https://github.com/CentroGeo/sigic-keycloak.git
 	branch = develop-bundle
 
-[submodule "frontend"]
-	path = frontend
-	url = https://github.com/CentroGeo/sigic-nuxt-frontend.git
-	branch = develop-bundle
-
 [submodule "ia-engine"]
 	path = ia-engine
 	url = https://github.com/CentroGeo/sigic-ia-engine.git
@@ -25,3 +20,6 @@
 [submodule "levantamiento"]
 	path = levantamiento
 	url = https://github.com/CentroGeo/sigic-levantamiento.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/CentroGeo/geosuite-nuxt-frontend.git
