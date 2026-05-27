@@ -7,6 +7,8 @@ x-common-django: &default-common-django
   restart: unless-stopped
   env_file:
     - .env
+  extra_hosts:
+    - "localhost:host-gateway"
   volumes:
     - statics:/mnt/volumes/statics
     - geoserver-data-dir:/geoserver_data/data
@@ -388,8 +390,8 @@ services:
       NUXT_PUBLIC_AUTH_BASE_URL: ${NGINX_BASE_URL}/app/api/auth
       KEYCLOAK_ISSUER: ${NGINX_BASE_URL}/iam/realms/sigic
       NUXT_PUBLIC_ENABLE_AUTH: false
-      NUXT_PUBLIC_ENABLE_CATALOGO_VISTA: false
-      NUXT_PUBLIC_ENABLE_CATALOGO_CARGA: false
+      NUXT_PUBLIC_ENABLE_CATALOGO_VISTA: true
+      NUXT_PUBLIC_ENABLE_CATALOGO_CARGA: true
       NUXT_PUBLIC_ENABLE_CONSULTA: true
       NUXT_PUBLIC_ENABLE_IAA: false
       NUXT_PUBLIC_ENABLE_LEVANTAMIENTO: false
