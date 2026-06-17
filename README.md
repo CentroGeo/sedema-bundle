@@ -1,37 +1,49 @@
-# sigic-bundle
+# geosuite-bundle
 
-
-git clone https://github.com/CentroGeo/sigic-bundle.git
+Instalar y hacer sync de submodulos
+``` bash
+git clone https://github.com/CentroGeo/geosuite-bundle.git
+cd geosuite-bundle
 git submodule update --init --recursive --remote
 git submodule update --remote --merge --recursive
+```
 
+En un inicio se puede utilizar `./sigic_install.sh local http` para levantar el proyecto en local y `./sigic_delete.sh` para bajarla. Para evitar errores, esta es la manera recomendable. Abajo esta la manera manual de levantar el proyecto.
+``` bash
+# Crear .env con parametros correctos, revisa --help para mas información. Existen flags para levantar IA.
+python3 create-envfile.py --env-type=ENV \
+--email=CORREO@PROVIDER.com --https --externalhttps \
+--hostname=HOSTNAME \
+--oidc_provider_url=HOSTNAME/iam/realms/sigic \
+--useoidc --usefrontendadmin --usefrontendapp
+# Levanta contenedores de docker (no incluye IA)
+COMPOSE_PROFILES=geonode,oidc,frontend docker compose up -d
+```
 
---env_type=prod default 
+Finalmente revisa que la configuración de keycloak esté correcto. Puedes utilizar los json de overrides/keycloak desde la plataforma de keycloak.
+entrar a keycloak, en realm master crear usuario admin y ponerle password, asignarle rol admin en role-mappings de ese realm
+crear realm sigic:
 
-python3 create-envfile.py --email=info@cesarbenjamin.net --https / --externalhttps \
---hostname=geosuite.demo.cesarbenjamin.net  
---oidc_provider_url=https://geosuite.demo.cesarbenjamin.net/iam/realms/sigic
---useoidc --usefrontendadmin --usefrontendapp --usellm --homepath=app
+en realm sigic, crear cliente sigic-admin con access type confidential, y token exchange enabled, cambiar datos en .env
 
+en realm sigic, crear cliente sigic-app con access type confidential, y token exchange enabled, cambiar datos en .env
 
-docker compose --profile oidc --profile frontend-admin --profile frontend-pub --profile llm down 
-docker compose --profile oidc --profile llm --profile frontend-admin --profile frontend-pub build --no-cache
-docker compose --profile oidc --profile frontend-admin --profile frontend-pub --profile llm up -d --remove-orphans
+en realm sigic, crear cliente sigic-geonode con access type confidential, y token exchange enabled, conservar secret
 
+# Docs para producción
+``` python
 python3 create-envfile.py --env_type=prod --hostname=dv-sigic.snic.secihti.mx --useoidc --oidc_provider_url=https://dv-sigic.snic.secihti.mx/iam/realms/sigic --homepath=app --externalhttps --email=sigic@secihti.mx 
+```
 
+```
 todo:      COMPOSE_PROFILES=geonode,oidc,https,ia,ollama docker compose pull
 ia remoto: COMPOSE_PROFILES=geonode,oidc,https docker compose pull
+```
 
+``` bash
 COMPOSE_PROFILES=frontend-admin,frontend-app docker compose build --no-cache
 COMPOSE_PROFILES=geonode,oidc,frontend-admin,frontend-app docker compose up -d
-
-
-entrar a keycloak, en realm master crear usuario admin y ponerle password, asignarle rol admin en role-mappings de ese realm
-crear realm sigic
-en realm sigic, crear cliente sigic-admin con access type confidential, y token exchange enabled, cambiar datos en .env
-en realm sigic, crear cliente sigic-app con access type confidential, y token exchange enabled, cambiar datos en .env
-en realm sigic, crear cliente sigic-geonode con access type confidential, y token exchange enabled, conservar secret
+```
 
 realm settings:
 
@@ -71,6 +83,7 @@ dv-sigic.snic.secihti.mx
 
 ---
 
+``` bash
 docker compose --profile oidc --profile frontend-admin --profile frontend-pub --profile llm down 
 
 docker compose build --no-cache --profile core    # postgres y nginx general (no el nginx del ia-lb)
@@ -84,3 +97,4 @@ docker compose --profile ia up -d
 docker compose --profile ia-db up -d
 docker compose --profile ia-lb up -d
 docker compose --profile ia-engine up -d
+```
