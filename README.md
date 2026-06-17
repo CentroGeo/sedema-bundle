@@ -9,6 +9,8 @@ git submodule update --remote --merge --recursive
 ```
 
 En un inicio se puede utilizar `./sigic_install.sh local http` para levantar el proyecto en local y `./sigic_delete.sh` para bajarla. Para evitar errores, esta es la manera recomendable. Abajo esta la manera manual de levantar el proyecto.
+
+# Pasos Manuales
 ``` bash
 # Crear .env con parametros correctos, revisa --help para mas información. Existen flags para levantar IA.
 python3 create-envfile.py --env-type=ENV \
