@@ -85,7 +85,9 @@ services:
 
     restart: unless-stopped
     networks:
-      - sigicnetwork
+        sigicnetwork:
+            aliases:
+              - sigic.localhost
 
   # memcached service
   memcached:
