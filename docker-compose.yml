@@ -5,6 +5,8 @@ x-common-django: &default-common-django
     context: ./geonode
     dockerfile: Dockerfile
   restart: unless-stopped
+  extra_hosts:
+    - '${PLATFORM_HOST}:host-gateway'
   env_file:
     - .env
   volumes:
@@ -286,6 +288,8 @@ services:
       dockerfile: Dockerfile
     container_name: keycloak4${COMPOSE_PROJECT_NAME}
     restart: unless-stopped
+    extra_hosts:
+      - '${PLATFORM_HOST}:host-gateway'
     expose:
       - "8080"
     env_file:
