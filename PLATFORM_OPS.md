@@ -194,6 +194,40 @@ Esta variable debe estar vacía (no definida). Si se le asigna la URL externa de
 
 ---
 
+## Operaciones manuales en el servidor
+
+### ⚠️ Nunca usar `docker restart` directamente
+
+En modo multi-plataforma, el archivo `.env` en la raíz de `/opt/sigic-bundle` siempre
+corresponde al **último deploy ejecutado** — no necesariamente a la plataforma que quieres
+operar. Si usas `docker restart <contenedor>`, Docker Compose puede rearmar el contenedor
+con variables del `.env` equivocado.
+
+**Siempre usar el env file explícito:**
+
+```bash
+# ✅ Correcto — recrear un contenedor con su env file
+COMPOSE_PROJECT_NAME=conafor-qa COMPOSE_PROFILES=geonode,oidc,frontend \
+  docker compose --env-file .env.conafor-qa \
+  -f docker-compose.yml -f docker-compose.platform.yml up -d --force-recreate django
+
+# ✅ Correcto — levantar contenedores Created
+COMPOSE_PROJECT_NAME=conafor-qa COMPOSE_PROFILES=geonode,oidc,frontend \
+  docker compose --env-file .env.conafor-qa \
+  -f docker-compose.yml -f docker-compose.platform.yml up -d
+
+# ❌ Incorrecto — puede usar variables de otra plataforma
+docker restart django4conafor-qa
+```
+
+Si por alguna razón necesitas usar comandos de Docker directamente, primero sincroniza el `.env`:
+
+```bash
+cp .env.conafor-qa .env
+```
+
+---
+
 ## Notas operativas
 
 - El DNS wildcard `*.geosuitemp.centrogeo.org.mx` cubre automáticamente cualquier nuevo subdominio de plataforma en el servidor de dev/qa.
