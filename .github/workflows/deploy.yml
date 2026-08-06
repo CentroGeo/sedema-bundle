@@ -30,8 +30,45 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Job 1: construye la imagen django en GitHub (red rápida)
+  # y la publica en ghcr.io para que Nimbus solo haga pull.
+  # ─────────────────────────────────────────────────────────────
+  build-django:
+    name: Build imagen django
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      image: ${{ steps.push.outputs.image }}
+
+    steps:
+      - name: Checkout repo principal
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Checkout submodule geonode
+        run: |
+          git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "https://github.com/"
+          git submodule update --init geonode
+
+      - name: Login a GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build y push imagen django
+        id: push
+        run: |
+          IMAGE="ghcr.io/${{ github.repository_owner }}/sigic-bundle/sigic_geonode:${{ github.sha }}"
+          docker build -t "$IMAGE" ./geonode
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 2: despliega en Nimbus usando la imagen ya construida.
+  # ─────────────────────────────────────────────────────────────
   deploy:
     name: ${{ inputs.platform }}-${{ inputs.environment }}
+    needs: build-django
     # Runner self-hosted en Nimbus (10.2.102.228), donde viven los stacks de dev y QA.
     runs-on: [self-hosted, nimbus]
     # 90 min para absorber cold starts de Django (migraciones) y Keycloak.
@@ -63,6 +100,14 @@ jobs:
           git checkout ${{ github.ref_name }}
           git pull origin ${{ github.ref_name }}
           git submodule update --init --recursive
+
+      # Descarga la imagen django ya construida en el job anterior y
+      # la retaguea con el nombre que espera docker-compose.yml.
+      - name: Pull imagen django pre-construida
+        run: |
+          echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ${{ needs.build-django.outputs.image }}
+          docker tag ${{ needs.build-django.outputs.image }} ghcr.io/centrogeo/sigic-geonode-wrapper/sigic_geonode:latest
 
       # Delega toda la lógica al script existente:
       # genera .env, preserva passwords, levanta docker compose,
