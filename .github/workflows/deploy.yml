@@ -56,7 +56,7 @@ jobs:
           git submodule update --init geonode
 
       - name: Login a GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build y push imagen django
         id: push
