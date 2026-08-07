@@ -5,6 +5,8 @@ x-common-django: &default-common-django
     context: ./geonode
     dockerfile: Dockerfile
   restart: unless-stopped
+  extra_hosts:
+    - '${PLATFORM_HOST}:host-gateway'
   env_file:
     - .env
   extra_hosts:
@@ -288,6 +290,8 @@ services:
       dockerfile: Dockerfile
     container_name: keycloak4${COMPOSE_PROJECT_NAME}
     restart: unless-stopped
+    extra_hosts:
+      - '${PLATFORM_HOST}:host-gateway'
     expose:
       - "8080"
     env_file:
@@ -321,7 +325,7 @@ services:
   # Frontend for admin users
   frontend-admin:
     profiles: ["frontend", "frontend-admin"]
-    image: ghcr.io/centrogeo/sigic-nuxt-frontend:latest
+    image: ghcr.io/centrogeo/geosuite-nuxt-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -353,6 +357,12 @@ services:
       NUXT_PUBLIC_ENABLE_CONSULTA: true
       NUXT_PUBLIC_ENABLE_IAA: ${ENABLE_IA_PROXY:-false}
       NUXT_PUBLIC_ENABLE_LEVANTAMIENTO: ${ENABLE_LEVANTAMIENTO_PROXY:-false}
+      NUXT_PUBLIC_ENABLE_ACERCA_DE: ${NUXT_PUBLIC_ENABLE_ACERCA_DE:-false}
+      NUXT_PUBLIC_ENABLE_GEOCONTENIDOS: ${NUXT_PUBLIC_ENABLE_GEOCONTENIDOS:-false}
+      NUXT_PUBLIC_ENABLE_GEOHISTORIAS: ${NUXT_PUBLIC_ENABLE_GEOHISTORIAS:-false}
+      NUXT_PUBLIC_ENABLE_TABLEROS: ${NUXT_PUBLIC_ENABLE_TABLEROS:-false}
+      NUXT_PUBLIC_ENABLE_PANORAMAS: ${NUXT_PUBLIC_ENABLE_PANORAMAS:-false}
+      NUXT_PUBLIC_ENABLE_LANDING_BUILDER: ${NUXT_PUBLIC_ENABLE_LANDING_BUILDER:-false}
       KEYCLOAK_CLIENT_ID: ${ADMIN_KEYCLOAK_CLIENT_ID}
       KEYCLOAK_CLIENT_SECRET: ${ADMIN_KEYCLOAK_CLIENT_SECRET}
       NUXT_AUTH_SECRET: ${ADMIN_NUXT_AUTH_SECRET}
@@ -363,7 +373,7 @@ services:
   # Frontend for end users
   frontend-app:
     profiles: ["frontend", "frontend-app"]
-    image: ghcr.io/centrogeo/sigic-nuxt-frontend:latest
+    image: ghcr.io/centrogeo/geosuite-nuxt-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -395,6 +405,12 @@ services:
       NUXT_PUBLIC_ENABLE_CONSULTA: true
       NUXT_PUBLIC_ENABLE_IAA: false
       NUXT_PUBLIC_ENABLE_LEVANTAMIENTO: false
+      NUXT_PUBLIC_ENABLE_ACERCA_DE: false
+      NUXT_PUBLIC_ENABLE_GEOCONTENIDOS: false
+      NUXT_PUBLIC_ENABLE_GEOHISTORIAS: false
+      NUXT_PUBLIC_ENABLE_TABLEROS: false
+      NUXT_PUBLIC_ENABLE_PANORAMAS: false
+      NUXT_PUBLIC_ENABLE_LANDING_BUILDER: false
       KEYCLOAK_CLIENT_ID: ${APP_KEYCLOAK_CLIENT_ID}
       KEYCLOAK_CLIENT_SECRET: ${APP_KEYCLOAK_CLIENT_SECRET}
       NUXT_AUTH_SECRET: ${APP_NUXT_AUTH_SECRET}

@@ -1,0 +1,13 @@
+{
+  "env_type": "dev",
+  "hostname": "sigic.localhost",
+  "oidc_provider_url": "http://sigic.localhost/iam/realms/sigic",
+  "email": "sigic@centrogeo.edu.mx",
+  "homepath": "admin",
+  "useoidc": true,
+  "usefrontendadmin": true,
+  "usefrontendapp": true,
+  "enableiaproxy": false,
+  "enableiadb": false,
+  "profiles": ["geonode", "oidc", "frontend"]
+}
