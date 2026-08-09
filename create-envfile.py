@@ -49,6 +49,7 @@ _strong_chars = shuffle(
     string.ascii_letters
     + string.digits
     + string.punctuation.replace('"', "").replace("'", "").replace("`", "")
+    .replace("#", "").replace("\\", "").replace("$", "").replace("=", "")
 )
 
 
@@ -155,7 +156,7 @@ def generate_env_file(args):
 
         _vals_to_replace["secret_key"] = _jsfile.get(
             "secret_key", args.secret_key
-        ) or "".join(random.choice(_strong_chars) for _ in range(50))
+        ) or secrets.token_urlsafe(50)
         _vals_to_replace["letsencrypt_mode"] = (
             "disabled"
             if not _vals_to_replace.get("https_host")
