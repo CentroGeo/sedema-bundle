@@ -62,19 +62,19 @@ jobs:
         id: push
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE="ghcr.io/${OWNER}/sigic-bundle/sigic_geonode:${{ github.sha }}"
+          IMAGE="ghcr.io/${OWNER}/sedema-bundle/sigic_geonode:${{ github.sha }}"
           docker build -t "$IMAGE" ./geonode
           docker push "$IMAGE"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
   # ─────────────────────────────────────────────────────────────
-  # Job 2: despliega en Nimbus usando la imagen ya construida.
+  # Job 2: despliega en sedema-server usando la imagen ya construida.
   # ─────────────────────────────────────────────────────────────
   deploy:
     name: ${{ inputs.platform }}-${{ inputs.environment }}
     needs: build-django
-    # Runner self-hosted en Nimbus (10.2.102.228), donde viven los stacks de dev y QA.
-    runs-on: [self-hosted, nimbus]
+    # Runner self-hosted en sedema (10.2.102.61).
+    runs-on: [self-hosted, sedema]
     # 90 min para absorber cold starts de Django (migraciones) y Keycloak.
     timeout-minutes: 90
 
@@ -83,14 +83,14 @@ jobs:
       # Falla si hay archivos rastreados modificados (excluye submodules).
       - name: Verificar estado del repo
         run: |
-          cd /opt/sigic-bundle
+          cd /opt/sedema-bundle
           SUBMODULE_PATHS=$(git config --file .gitmodules --get-regexp 'submodule\..*\.path' | awk '{print $2}')
           DIRTY=$(git status --porcelain | grep -v '^??' | while IFS= read -r line; do
             FPATH=$(echo "$line" | awk '{print $NF}')
             echo "$SUBMODULE_PATHS" | grep -qx "$FPATH" || echo "$line"
           done)
           if [ -n "$DIRTY" ]; then
-            echo "❌ Hay cambios sin commitear en archivos rastreados de /opt/sigic-bundle:"
+            echo "❌ Hay cambios sin commitear en archivos rastreados de /opt/sedema-bundle:"
             echo "$DIRTY"
             echo "Commitea o descarta los cambios antes de desplegar."
             exit 1
@@ -99,7 +99,7 @@ jobs:
       # Actualiza el bundle y submodules a la rama desde la que se disparó el workflow.
       - name: Sync bundle
         run: |
-          cd /opt/sigic-bundle
+          cd /opt/sedema-bundle
           git fetch origin
           git checkout ${{ github.ref_name }}
           git pull origin ${{ github.ref_name }}
@@ -118,7 +118,7 @@ jobs:
       # importa Keycloak y carga fixtures de Django.
       - name: Deploy
         run: |
-          cd /opt/sigic-bundle
+          cd /opt/sedema-bundle
           ./sigic_install.sh ${{ inputs.platform }} ${{ inputs.environment }}
 
       # Valida que el stack quedó levantado correctamente:
