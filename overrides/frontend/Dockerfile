@@ -40,7 +40,7 @@ COPY --from=builder /app/.output/ .output/
 
 # ipx es peer dependency de @nuxt/image y no queda bundleado por Nitro;
 # se instala explícitamente para garantizar disponibilidad en runtime
-RUN npm install sharp --ignore-scripts --no-save && npm install ipx@2 --no-save
+RUN npm install ipx@2 --no-save --ignore-scripts
 
 EXPOSE 3000
 
