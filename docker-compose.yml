@@ -7,10 +7,9 @@ x-common-django: &default-common-django
   restart: unless-stopped
   extra_hosts:
     - '${PLATFORM_HOST}:host-gateway'
+    - "localhost:host-gateway"
   env_file:
     - .env
-  extra_hosts:
-    - "localhost:host-gateway"
   volumes:
     - statics:/mnt/volumes/statics
     - geoserver-data-dir:/geoserver_data/data
