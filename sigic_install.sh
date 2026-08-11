@@ -205,6 +205,21 @@ if [ "$PLATFORM_MODE" = true ]; then
   echo "PLATFORM_NAME=${PLATFORM}" >> .env
   echo "KEYCLOAK_IMPORT_SUBDIR=${COMPOSE_PROJECT_NAME}" >> .env
 
+  # aplicar variables adicionales del env file de plataforma (todo lo que no sea hostname/env_type/oidc_provider_url/https_mode)
+  while IFS='=' read -r key value; do
+    [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+    key=$(echo "$key" | xargs)
+    value=$(echo "$value" | xargs)
+    case "$key" in
+      hostname|env_type|oidc_provider_url|https_mode) continue ;;
+    esac
+    if grep -q "^${key}=" .env; then
+      sed -i "s|^${key}=.*|${key}=${value}|" .env
+    else
+      echo "${key}=${value}" >> .env
+    fi
+  done < "$ENV_FILE"
+
   # en reinstall: preservar contraseñas de DB para no romper volúmenes existentes
   if [ -f "$ENV_ACTIVE" ]; then
     echo "🔒 Reinstall detectado — preservando contraseñas de DB existentes..."
