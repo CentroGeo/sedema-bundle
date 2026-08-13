@@ -19,7 +19,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY frontend/package*.json ./
 
-RUN npm install --include=dev --legacy-peer-deps
+# --ignore-scripts evita que npm ejecute el script prepare (nuxt prepare + patches)
+# antes de que el código fuente esté disponible
+RUN npm install --include=dev --legacy-peer-deps --ignore-scripts
 
 COPY frontend/ .
 
