@@ -297,8 +297,9 @@ NGINXEOF
   # fi
 
   # Construir imágenes de frontend en cada deploy para garantizar que estén actualizadas
+  # --no-parallel evita OOM: dos builds de Nuxt en paralelo agotan la RAM del servidor
   echo "🔨 Construyendo imágenes de frontend para ${COMPOSE_PROJECT_NAME}..."
-  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml build frontend-admin frontend-app
+  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml build --no-parallel frontend-admin frontend-app
 
   COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml up -d || true
 
