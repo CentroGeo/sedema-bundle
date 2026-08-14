@@ -40,13 +40,9 @@ WORKDIR /app
 
 COPY --from=builder /app/.output/ .output/
 
-# ipx es peer dependency de @nuxt/image; @vue-office/* son externos al bundle del servidor
-RUN npm install ipx@2 \
-    @vue-office/docx@1.6.3 \
-    @vue-office/excel@1.7.14 \
-    @vue-office/pptx@1.0.1 \
-    @vue-office/pdf@2.0.10 \
-    --no-save --ignore-scripts --legacy-peer-deps
+# ipx es peer dependency de @nuxt/image y no queda bundleado por Nitro;
+# se instala explícitamente para garantizar disponibilidad en runtime
+RUN npm install ipx@2 --no-save --ignore-scripts
 
 EXPOSE 3000
 
