@@ -28,7 +28,7 @@ COPY frontend/ .
 # Overlays de plataforma — sobreescriben archivos del código base sin modificar el submodulo
 COPY platforms/${PLATFORM_NAME}/overrides/frontend/ .
 
-RUN npm run build
+RUN node --max-old-space-size=8192 node_modules/.bin/nuxt build
 
 
 # 🚀 Final stage
