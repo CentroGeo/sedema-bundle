@@ -28,7 +28,7 @@ COPY frontend/ .
 # Overlays de plataforma — sobreescriben archivos del código base sin modificar el submodulo
 COPY platforms/${PLATFORM_NAME}/overrides/frontend/ .
 
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
 
 # 🚀 Final stage
