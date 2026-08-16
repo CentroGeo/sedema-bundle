@@ -28,6 +28,9 @@ COPY frontend/ .
 # Overlays de plataforma — sobreescriben archivos del código base sin modificar el submodulo
 COPY platforms/${PLATFORM_NAME}/overrides/frontend/ .
 
+RUN npm rebuild @vue-office/docx @vue-office/excel @vue-office/pdf @vue-office/pptx \
+    && npm run postinstall
+
 RUN npm run build
 
 

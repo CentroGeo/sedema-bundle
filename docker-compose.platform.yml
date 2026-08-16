@@ -6,6 +6,8 @@ services:
 
   frontend-admin:
     image: sigic-frontend-admin:${COMPOSE_PROJECT_NAME}
+    environment:
+      NUXT_APP_BASE_URL: /admin/
     build:
       context: .
       dockerfile: overrides/frontend/Dockerfile
@@ -15,6 +17,8 @@ services:
 
   frontend-app:
     image: sigic-frontend-app:${COMPOSE_PROJECT_NAME}
+    environment:
+      NUXT_APP_BASE_URL: /app/
     build:
       context: .
       dockerfile: overrides/frontend/Dockerfile
