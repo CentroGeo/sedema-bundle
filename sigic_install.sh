@@ -183,6 +183,18 @@ fi
 
 PROFILES=$(jq -r '.profiles | join(",")' "$FLAVOR_FILE")
 
+# archivos de compose usados en modo plataforma
+COMPOSE_FILES=(-f docker-compose.yml -f docker-compose.platform.yml)
+
+# modo dev local: los frontends corren en el host con `nuxt dev` (hot reload),
+# no en Docker. Se quitan los profiles de frontend y se agrega el overlay dev
+# que evita que nginx monte los proxies hacia upstreams inexistentes.
+if [ "${SIGIC_DEV:-0}" = "1" ]; then
+  PROFILES=$(echo "$PROFILES" | tr ',' '\n' | grep -v '^frontend' | paste -sd, -)
+  COMPOSE_FILES+=(-f docker-compose.dev.yml)
+  echo "🧪 SIGIC_DEV=1 — frontends fuera de Docker"
+fi
+
 echo "🚀 Profiles: $PROFILES"
 
 # =========================
@@ -298,12 +310,14 @@ NGINXEOF
 
   # Construir imágenes de frontend secuencialmente para evitar OOM
   # (dos builds de Nuxt en paralelo agotan la RAM del servidor)
-  echo "🔨 Construyendo frontend-admin para ${COMPOSE_PROJECT_NAME}..."
-  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml build frontend-admin
-  echo "🔨 Construyendo frontend-app para ${COMPOSE_PROJECT_NAME}..."
-  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml build frontend-app
+  if echo "$PROFILES" | grep -q "frontend"; then
+    echo "🔨 Construyendo frontend-admin para ${COMPOSE_PROJECT_NAME}..."
+    COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" "${COMPOSE_FILES[@]}" build frontend-admin
+    echo "🔨 Construyendo frontend-app para ${COMPOSE_PROJECT_NAME}..."
+    COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" "${COMPOSE_FILES[@]}" build frontend-app
+  fi
 
-  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml up -d || true
+  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" "${COMPOSE_FILES[@]}" up -d || true
 
   # reintentar si init-keycloak-db falla por race condition con PostgreSQL
   # (pg_isready pasa antes de que el init script haya creado los usuarios)
@@ -320,7 +334,7 @@ NGINXEOF
     echo "⚠️  init-keycloak-db falló (intento $attempt/3) — reintentando en 20s..."
     docker rm "$INIT_CONTAINER" 2>/dev/null || true
     sleep 20
-    COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml up -d || true
+    COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" "${COMPOSE_FILES[@]}" up -d || true
   done
 
   # recargar proxy si está corriendo
@@ -397,7 +411,7 @@ fi
 if [ "$PLATFORM_MODE" = true ]; then
   # Segunda pasada: levantar contenedores que quedaron en Created por dependencia de Django
   # (en fresh install, celery y geoserver fallan al arrancar porque Django aún no está healthy)
-  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" -f docker-compose.yml -f docker-compose.platform.yml up -d || true
+  COMPOSE_PROFILES=$PROFILES docker compose --env-file "$ENV_ACTIVE" "${COMPOSE_FILES[@]}" up -d || true
 fi
 
 echo "🎉 SIGIC instalado con éxito!"

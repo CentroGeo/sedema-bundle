@@ -1,0 +1,24 @@
+# =============================================================================
+#  OVERLAY DE DESARROLLO LOCAL
+#
+#  Se aplica encima de docker-compose.yml + docker-compose.platform.yml cuando
+#  se instala con SIGIC_DEV=1 (ver sigic_install.sh y DEV_LOCAL.md).
+#
+#  En dev local los frontends NO corren en Docker: corren en el host con
+#  `nuxt dev` (hot reload). Por eso nginx no debe montar los proxies que
+#  apuntan a los upstreams frontend-admin / frontend-app: esos contenedores
+#  no existen y nginx entraría en crash-loop con
+#  "host not found in upstream frontend-admin".
+#
+#  `!override` reemplaza la lista de volúmenes completa (Compose >= 2.24) en
+#  lugar de fusionarla, que es la única forma de QUITAR un montaje.
+# =============================================================================
+
+services:
+  nginx:
+    volumes: !override
+      - nginx-confd:/etc/nginx
+      - nginx-certificates:/geonode-certificates
+      - statics:/mnt/volumes/statics
+      - uploaded-ia:/mnt/volumes/statics/uploaded/ia
+      - ./overrides/nginx/z-keycloak-proxy.conf:/etc/nginx/sites-enabled/z-keycloak-proxy.conf:ro
