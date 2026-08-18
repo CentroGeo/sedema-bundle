@@ -28,6 +28,20 @@ COPY frontend/ .
 # Overlays de plataforma — sobreescriben archivos del código base sin modificar el submodulo
 COPY platforms/${PLATFORM_NAME}/overrides/frontend/ .
 
+# El npm install de arriba usa --ignore-scripts porque el postinstall del proyecto
+# necesita el código fuente, que en ese punto aún no estaba copiado. Ese flag es
+# global: también saltó los postinstall de las dependencias. Ya con el código
+# presente, se ejecutan aquí.
+#
+# npm rebuild: @vue-office/* declaran main=lib/index.js, y ese archivo NO viene en
+# el tarball — lo genera su postinstall copiando lib/v3/index.js (elige v2 o v3
+# según la versión de Vue instalada). Sin esto el build muere con
+# "Failed to resolve entry for package @vue-office/docx".
+#
+# npm run postinstall: aplica nuxt prepare y los parches de focus-trap y nuxt-auth.
+RUN npm rebuild @vue-office/docx @vue-office/excel @vue-office/pdf @vue-office/pptx \
+    && npm run postinstall
+
 RUN npm run build
 
 
