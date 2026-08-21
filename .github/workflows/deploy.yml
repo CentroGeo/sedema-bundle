@@ -104,6 +104,7 @@ jobs:
           git checkout ${{ github.ref_name }}
           git pull origin ${{ github.ref_name }}
           git submodule sync --recursive
+          git config submodule.frontend.url https://github.com/CentroGeo/sedema-nuxt-frontend.git
           git submodule update --init --recursive
 
       # Descarga la imagen django ya construida en el job anterior y
