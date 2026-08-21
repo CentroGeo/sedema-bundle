@@ -10,6 +10,7 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/CentroGeo/sedema-nuxt-frontend.git
+	branch = sedema/all_sedema_ready_fixes_and_additions
 
 [submodule "ia-engine"]
 	path = ia-engine
