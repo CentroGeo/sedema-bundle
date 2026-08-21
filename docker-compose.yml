@@ -368,6 +368,8 @@ services:
       NUXT_AUTH_SECRET: ${ADMIN_NUXT_AUTH_SECRET}
       NUXT_APP_BASE_URL: /admin/
       NUXT_PUBLIC_OLLAMA_MODEL: "${OLLAMA_MODEL:-deepseek-r1}"
+    volumes:
+      - landing_builder_data:/app/.data
     networks: [sigicnetwork]
 
   # Frontend for end users
@@ -417,6 +419,8 @@ services:
       NUXT_AUTH_SECRET: ${APP_NUXT_AUTH_SECRET}
       NUXT_APP_BASE_URL: /app/
       NUXT_PUBLIC_OLLAMA_MODEL: "${OLLAMA_MODEL:-deepseek-r1}"
+    volumes:
+      - landing_builder_data:/app/.data
     networks: [sigicnetwork]
 
   # Redis service for IA engine and queue
@@ -618,5 +622,7 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME}-ollama_data
   levantamiento-uploads:
     name: ${COMPOSE_PROJECT_NAME}-levantamiento-uploads
+  landing_builder_data:
+    name: ${COMPOSE_PROJECT_NAME}-landing_builder_data
   levantamiento-downloads:
     name: ${COMPOSE_PROJECT_NAME}-levantamiento-downloads
