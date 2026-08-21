@@ -9,7 +9,7 @@
 
 [submodule "frontend"]
 	path = frontend
-	url = https://github.com/CentroGeo/geosuite-nuxt-frontend.git
+	url = https://github.com/CentroGeo/sedema-nuxt-frontend.git
 
 [submodule "ia-engine"]
 	path = ia-engine
